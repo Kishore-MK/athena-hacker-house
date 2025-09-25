@@ -37,7 +37,7 @@ export function Bird({ selectedBird, gameState, birdPosition, birdVelocity, drag
             style={{ 
               position: 'absolute', 
               left: dragEnd.x - GAME_CONFIG.birdSize.width/2, 
-              top: dragEnd.y - GAME_CONFIG.birdSize.height/2, 
+              top: dragEnd.y - GAME_CONFIG.birdSize.height/5, 
               pointerEvents: 'none' 
             }}
           >

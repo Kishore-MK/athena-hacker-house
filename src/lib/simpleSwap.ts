@@ -4,7 +4,7 @@ import { TOKEN_ADDRESSES, type Token } from './constants';
 const UNISWAP_V2_ROUTER_ABI = [
   'function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)',
   'function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)',
-  'function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)',
+   'function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)',
   'function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)'
 ];
 
@@ -82,7 +82,7 @@ export async function executeTokenSwap(
       console.log('🪙 Token -> ETH swap', { path, params: swapParams });
 
       // Need approval for token
-      await approveToken(fromTokenAddress, UNISWAP_V2_ROUTER, amountIn, sendTransaction);
+      // await approveToken(fromTokenAddress, UNISWAP_V2_ROUTER, amountIn, sendTransaction);
 
       const result = await sendTransaction({
         to: UNISWAP_V2_ROUTER,
@@ -109,7 +109,7 @@ export async function executeTokenSwap(
       console.log('🔄 Token -> Token swap', { path, params: swapParams });
 
       // Need approval for input token
-      await approveToken(fromTokenAddress, UNISWAP_V2_ROUTER, amountIn, sendTransaction);
+      // await approveToken(fromTokenAddress, UNISWAP_V2_ROUTER, amountIn, sendTransaction);
 
       const result = await sendTransaction({
         to: UNISWAP_V2_ROUTER,

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { type Token } from '@/lib/constants';
 
 // Import custom hooks
@@ -23,9 +23,35 @@ import { Slingshot } from './objects/Slingshot';
 
 export function DeFiBirdsGame() {
   const [selectedBird, setSelectedBird] = useState<Token>('MON');
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
+  // Initialize audio on component mount
+  useEffect(() => {
+    // Create audio element for tarzan call sound
+    audioRef.current = new Audio('/call.mp3');
+    audioRef.current.preload = 'auto';
+    audioRef.current.volume = 0.3; // Set volume to 30%
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
   // Initialize hooks
   const wallet = useWallet();
+  
+  // Debug wallet state in main component
+  console.log('🎯 DeFiBirdsGame wallet state:', {
+    isConnected: wallet.isConnected,
+    address: wallet.address,
+    chainId: wallet.chainId,
+    hasBalances: Object.values(wallet.balances).some(b => b > 0),
+    balances: wallet.balances
+  });
+
   const gameLogic = useGameLogic({
     selectedBird,
     balances: wallet.balances,
@@ -47,6 +73,21 @@ export function DeFiBirdsGame() {
     dragEnd: gameLogic.dragEnd,
     setBirdVelocity: gameLogic.setBirdVelocity,
   });
+
+  // Play/stop sound based on bird flying state
+  useEffect(() => {
+    if (gameLogic.gameState === 'flying' && audioRef.current) {
+      audioRef.current.currentTime = 0; // Reset to beginning
+      audioRef.current.play().catch((error) => {
+        console.log('Audio play failed:', error);
+        // Audio autoplay might be blocked by browser, this is normal
+      });
+    } else if (audioRef.current && !audioRef.current.paused) {
+      // Stop audio when bird stops flying
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0; // Reset for next play
+    }
+  }, [gameLogic.gameState]);
 
   // Auto-select a bird with balance if current bird has no balance
   useEffect(() => {
@@ -93,8 +134,10 @@ export function DeFiBirdsGame() {
         address={wallet.address}
         connectors={wallet.connectors}
         isConnecting={wallet.isConnecting}
+        chainId={wallet.chainId}
         onConnect={wallet.connect}
         onDisconnect={wallet.disconnect}
+        onSwitchNetwork={wallet.switchToMonadTestnet}
       />
       
       {/* Bird Selection UI */}

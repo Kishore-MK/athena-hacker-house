@@ -1,9 +1,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Connector } from 'wagmi';
 
 interface WalletConnectionOverlayProps {
   isConnected: boolean;
-  connectors: any[];
+  connectors: readonly Connector[];
   isConnecting: boolean;
   onConnect: (connector: any) => void;
 }

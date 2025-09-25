@@ -3,14 +3,16 @@ import { Button } from '@/components/ui/button';
 import { type Token } from '@/lib/constants';
 
 interface BalancePanelProps {
-  balances: Record<Token, number>;
+  balances: Record<string, number>;
   chances: number;
   isConnected: boolean;
   address?: string;
-  connectors: any[];
+  connectors: readonly any[];
   isConnecting: boolean;
+  chainId?: number;
   onConnect: (connector: any) => void;
   onDisconnect: () => void;
+  onSwitchNetwork?: () => void; 
 }
 
 export function BalancePanel({ 
@@ -20,9 +22,23 @@ export function BalancePanel({
   address, 
   connectors, 
   isConnecting, 
+  chainId,
   onConnect, 
-  onDisconnect 
+  onDisconnect,
+  onSwitchNetwork, 
 }: BalancePanelProps) {
+  
+  // Debug the connection state received by BalancePanel
+  console.log('🎮 BalancePanel connection state:', {
+    isConnected,
+    address,
+    chainId,
+    hasBalances: Object.values(balances).some(b => b > 0),
+    balances
+  });
+  
+  const isCorrectNetwork = chainId === 10143;
+
   return (
     <div 
       className="fixed top-2 left-2 sm:top-4 sm:left-4 p-3 sm:p-4 bg-white/80 rounded-lg shadow-md backdrop-blur-sm z-30 text-sm sm:text-base"
@@ -34,10 +50,26 @@ export function BalancePanel({
       ))}
       <h2 className="text-lg font-bold mt-2">Chances</h2>
       <p>{chances}</p>
+     
       <div className="mt-4">
         {isConnected ? (
           <div>
             <p className="text-xs truncate">Connected: {address}</p>
+            {chainId && (
+              <p className="text-xs">
+                Network: {isCorrectNetwork ? '✅ Monad Testnet' : `❌ Chain ${chainId}`}
+              </p>
+            )}
+            {!isCorrectNetwork && onSwitchNetwork && (
+              <Button 
+                size="sm" 
+                variant="destructive" 
+                onClick={onSwitchNetwork}
+                className="mt-1 w-full mb-2 min-h-[40px] sm:min-h-auto"
+              >
+                Switch to Monad Testnet
+              </Button>
+            )}
             <Button 
               size="sm" 
               variant="outline" 

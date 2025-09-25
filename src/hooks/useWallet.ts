@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useAccount, useConnect, useDisconnect, useBalance, useSendTransaction } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useBalance, useSendTransaction, useChainId } from 'wagmi';
 import { useToast } from '@/hooks/use-toast';
 import { TOKEN_ADDRESSES, type Token } from '@/lib/constants';
 import { swapTokens } from '@/lib/simpleSwap'; 
@@ -10,7 +10,19 @@ export function useWallet() {
   const { disconnect } = useDisconnect();
   const { sendTransactionAsync } = useSendTransaction();
   const { toast } = useToast();
+  const chainId = useChainId();
   
+  // Debug wallet connection state
+  console.log('🔗 Wallet connection status:', {
+    isConnected,
+    address,
+    chainId,
+    expectedChainId: 10143,
+    chainIdMatch: chainId === 10143,
+    connectors: connectors.map(c => ({ name: c.name, id: c.id, uid: c.uid })),
+    isConnecting
+  });
+
   const { data: monBalance, refetch: refetchMonBalance } = useBalance({ address, chainId: 10143 });
   const { data: usdcBalance, refetch: refetchUsdcBalance } = useBalance({ address, token: TOKEN_ADDRESSES.USDC, chainId: 10143 });
   const { data: wethBalance, refetch: refetchWethBalance } = useBalance({ address, token: TOKEN_ADDRESSES.WETH, chainId: 10143 });
@@ -39,6 +51,53 @@ export function useWallet() {
     ]);
     console.log('✅ All balances refetched');
   }, [refetchMonBalance, refetchUsdcBalance, refetchWethBalance]);
+
+  const switchToMonadTestnet = useCallback(async () => {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x279F' }], // 10143 in hex
+        });
+      } catch (switchError: any) {
+        // This error code indicates that the chain has not been added to MetaMask
+        if (switchError.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x279F',
+                  chainName: 'Monad Testnet',
+                  nativeCurrency: {
+                    name: 'Monad',
+                    symbol: 'MON',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://testnet-rpc.monad.xyz'],
+                  blockExplorerUrls: ['https://testnet.monadexplorer.com'],
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error('Error adding Monad testnet:', addError);
+            toast({
+              title: 'Network Error',
+              description: 'Failed to add Monad testnet to MetaMask',
+              variant: 'destructive'
+            });
+          }
+        } else {
+          console.error('Error switching to Monad testnet:', switchError);
+          toast({
+            title: 'Network Error', 
+            description: 'Failed to switch to Monad testnet',
+            variant: 'destructive'
+          });
+        }
+      }
+    }
+  }, [toast]);
 
   const handleSwap = useCallback(async (fromToken: Token, toToken: Token) => {
     console.log('🚀 UNISWAP V3 SWAP FUNCTION CALLED', {
@@ -91,11 +150,25 @@ export function useWallet() {
       // Calculate swap amount
 let swapAmount;
 
+console.log('💰 Balance calculation debug:', {
+  fromToken,
+  balanceData: balanceData ? {
+    formatted: balanceData.formatted,
+    value: balanceData.value?.toString(),
+    decimals: balanceData.decimals
+  } : 'undefined',
+  balanceValue: balanceData?.value?.toString()
+});
+
 if (fromToken === 'MON') {
   // Reserve gas for current + 2 future swaps when swapping native token
-  const gasReserve = BigInt('5000000000000000000'); // ~0.05 MON for 3 swaps
+  const gasReserve = BigInt('10000000000000000'); // 0.01 MON for gas
   swapAmount = balanceData.value - gasReserve;
-  console.log('swapAmount', swapAmount);
+  console.log('MON swap amount calculation:', {
+    originalBalance: balanceData.value.toString(),
+    gasReserve: gasReserve.toString(),
+    swapAmount: swapAmount.toString()
+  });
   
   if (swapAmount <= BigInt(0)) {
     toast({ 
@@ -106,7 +179,12 @@ if (fromToken === 'MON') {
     return;
   }
 } else { 
-  swapAmount = balanceData.value - BigInt('1000000000000000');
+  swapAmount = balanceData.value - BigInt('1000000000000000'); // Reserve small amount for gas
+  console.log('Token swap amount calculation:', {
+    originalBalance: balanceData.value.toString(),
+    gasReserve: '1000000000000000',
+    swapAmount: swapAmount.toString()
+  });
 }
 
       const txHash = await swapTokens(
@@ -162,5 +240,7 @@ if (fromToken === 'MON') {
     disconnect,
     handleSwap,
     refetchAllBalances,
+    switchToMonadTestnet,
+    chainId,
   };
 } 

@@ -161,7 +161,7 @@ console.log('💰 Balance calculation debug:', {
 });
 
 if (fromToken === 'MON') {
-  // Reserve gas for current + 2 future swaps when swapping native token
+  // Reserve gas for MON swaps (native token)
   const gasReserve = BigInt('10000000000000000'); // 0.01 MON for gas
   swapAmount = balanceData.value - gasReserve;
   console.log('MON swap amount calculation:', {
@@ -179,11 +179,13 @@ if (fromToken === 'MON') {
     return;
   }
 } else { 
-  swapAmount = balanceData.value - BigInt('1000000000000000'); // Reserve small amount for gas
+  // For ERC20 tokens (USDC, WETH), use almost full balance
+  // No gas reserve needed since gas is paid in native MON, not the token being swapped
+  swapAmount = balanceData.value; // Use full balance
   console.log('Token swap amount calculation:', {
     originalBalance: balanceData.value.toString(),
-    gasReserve: '1000000000000000',
-    swapAmount: swapAmount.toString()
+    swapAmount: swapAmount.toString(),
+    note: 'Using full balance - no gas reserve needed for ERC20 tokens'
   });
 }
 

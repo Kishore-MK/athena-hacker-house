@@ -71,20 +71,8 @@ export function BirdSelection({ selectedBird, onBirdSelect, balances, onRefreshB
       style={{ pointerEvents: 'auto' }}
     >
       <h3 className="text-sm font-semibold text-gray-700 mb-2">Select Bird</h3>
-      <button 
-        onClick={() => console.log('🧪 TEST BUTTON CLICKED!')}
-        className="mb-1 px-2 py-1 text-xs bg-green-200 hover:bg-green-300 rounded"
-      >
-        Test Click
-      </button>
-      {onRefreshBalances && (
-        <button 
-          onClick={onRefreshBalances}
-          className="mb-2 px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded"
-        >
-          <RefreshCcw/>
-        </button>
-      )}
+      
+       
       <div className="flex gap-2 sm:gap-2">
         {Object.keys(TOKENS).map(token => {
           const tokenKey = token as Token;

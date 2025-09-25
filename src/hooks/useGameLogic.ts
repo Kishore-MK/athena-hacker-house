@@ -21,7 +21,7 @@ type TowerStructure = {
 
 function generateTower(token: Token, index: number, gameAreaWidth: number): TowerStructure {
   const blocks: Block[] = [];
-  const base_x = gameAreaWidth - 300 - (index * 180);
+  const base_x = gameAreaWidth - 250 - (index * 200); // Reduced from 450 to 250 to move towers more right
   const blockWidth = 40;
   const blockHeight = 20;
   const levels = Math.floor(Math.random() * 3) + 3;

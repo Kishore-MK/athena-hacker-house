@@ -18,8 +18,8 @@ export const SWAP_PAIRS: { [key in Token]: Token[] } = {
 export const GAME_CONFIG = {
   gravity: 0.2,
   launchPower: 0.25, // Slightly increased from 0.2 to help with longer distance
-  groundHeight: 96,
-  slingshotPosition: { x: 100, y: 420 }, // Moved slightly left from 120 to 100
+  groundHeight: 120, // Increased to match larger game area
+  slingshotPosition: { x: 120, y: 500 }, // Adjusted for larger game area
   maxDragDistance: 90, // Increased from 80 to 90 for more power
   birdSize: { width: 48, height: 48 },
   towerWidth: 120,

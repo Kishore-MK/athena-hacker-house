@@ -21,7 +21,10 @@ type TowerStructure = {
 
 function generateTower(token: Token, index: number, gameAreaWidth: number): TowerStructure {
   const blocks: Block[] = [];
-  const base_x = gameAreaWidth - 250 - (index * 200); // Reduced from 450 to 250 to move towers more right
+  // Use percentage-based positioning that scales with game area width
+  const rightMargin = Math.max(200, gameAreaWidth * 0.15); // At least 200px from right edge
+  const towerSpacing = Math.max(150, gameAreaWidth * 0.12); // At least 150px between towers
+  const base_x = gameAreaWidth - rightMargin - (index * towerSpacing);
   const blockWidth = 40;
   const blockHeight = 20;
   const levels = Math.floor(Math.random() * 3) + 3;
@@ -94,6 +97,7 @@ export function useGameLogic({ selectedBird, balances, isConnected, handleSwap, 
     if (!gameArea) return;
     const width = gameArea.getBoundingClientRect().width;
     const possibleTargets = SWAP_PAIRS[selectedBird];
+    console.log('🏰 Setting up towers', { width, possibleTargets, selectedBird });
     setTowers(possibleTargets.map((token, index) => generateTower(token, index, width)));
   }, [selectedBird]);
 
@@ -106,6 +110,18 @@ export function useGameLogic({ selectedBird, balances, isConnected, handleSwap, 
   useEffect(() => {
     handleNewTurn();
   }, [selectedBird, handleNewTurn]);
+
+  // Handle window resize to reposition towers
+  useEffect(() => {
+    const handleResize = () => {
+      if (gameState === 'ready') {
+        setupTowers();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [setupTowers, gameState]);
   
   // Auto-select a bird with balance if current bird has no balance
   useEffect(() => {

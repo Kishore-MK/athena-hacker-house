@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Web3Provider } from '@/components/providers/Web3Provider';
 
 export const metadata: Metadata = {
-  title: 'DeFi Birds',
+  title: 'Birdswap',
   description: 'A gamified DEX experience inspired by Angry Birds.',
 };
 

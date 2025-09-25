@@ -24,18 +24,27 @@ import { Slingshot } from './objects/Slingshot';
 export function DeFiBirdsGame() {
   const [selectedBird, setSelectedBird] = useState<Token>('MON');
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const backgroundAudioRef = useRef<HTMLAudioElement | null>(null);
   
   // Initialize audio on component mount
   useEffect(() => {
     // Create audio element for tarzan call sound
     audioRef.current = new Audio('/call.mp3');
-    audioRef.current.preload = 'auto';
-    audioRef.current.volume = 0.3; // Set volume to 30%
+    audioRef.current.preload = 'auto'; 
+    
+    // Create background audio element
+    backgroundAudioRef.current = new Audio('/angrybird.mp3');
+    backgroundAudioRef.current.preload = 'auto';
+    backgroundAudioRef.current.loop = true; 
     
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
+      }
+      if (backgroundAudioRef.current) {
+        backgroundAudioRef.current.pause();
+        backgroundAudioRef.current = null;
       }
     };
   }, []);
@@ -89,6 +98,21 @@ export function DeFiBirdsGame() {
     }
   }, [gameLogic.gameState]);
 
+  // Control background music based on wallet connection
+  useEffect(() => {
+    if (!wallet.isConnected && backgroundAudioRef.current) {
+      // Play background music when wallet is not connected
+      backgroundAudioRef.current.play().catch((error) => {
+        console.log('Background audio play failed:', error);
+        // Audio autoplay might be blocked by browser, this is normal
+      });
+    } else if (wallet.isConnected && backgroundAudioRef.current && !backgroundAudioRef.current.paused) {
+      // Stop background music when wallet connects
+      backgroundAudioRef.current.pause();
+      backgroundAudioRef.current.currentTime = 0; // Reset for next play
+    }
+  }, [wallet.isConnected]);
+
   // Auto-select a bird with balance if current bird has no balance
   useEffect(() => {
     console.log('🔄 Checking bird auto-selection:', { 
@@ -115,7 +139,7 @@ export function DeFiBirdsGame() {
   return (
     <div
       ref={gameLogic.gameAreaRef}
-      className="relative w-full h-[500px] sm:h-[600px] max-w-5xl bg-transparent overflow-hidden select-none touch-none"
+      className="relative w-full h-[600px] sm:h-[700px] lg:h-[800px] max-w-6xl bg-transparent overflow-hidden select-none touch-none"
       onMouseDown={controls.handleMouseDown}
       onMouseMove={controls.handleMouseMove}
       onMouseUp={controls.handleMouseUp}

@@ -12,12 +12,9 @@ export const config = createConfig({
   }),
   connectors: [ 
     injected({
-      target: {
-        id: 'metamask',
-        name: 'MetaMask',
-        provider: () => typeof window !== 'undefined' && window.ethereum?.isMetaMask ? window.ethereum : undefined,
-      },
-    }), 
+      target: 'metaMask',
+    }),
+    injected(), // Fallback generic injected connector
   ],
   transports: {
     [monadTestnet.id]: http(),

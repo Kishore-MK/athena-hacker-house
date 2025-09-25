@@ -30,14 +30,30 @@ export function WalletConnectionOverlay({
             const connector = metamaskConnectors[0];
             
             return connector ? (
-              <Button 
-                key={connector.uid} 
-                onClick={() => onConnect(connector)} 
-                disabled={isConnecting} 
-                className="min-h-[48px] sm:min-h-auto text-base sm:text-sm"
-              >
-                {isConnecting ? 'Connecting...' : 'Connect MetaMask'}
-              </Button>
+              <div className="flex flex-col gap-2">
+                
+                
+                {/* Manual MetaMask fallback */}
+                <Button 
+                  onClick={async () => {
+                    console.log('🔧 Manual MetaMask connect attempt');
+                    if (typeof window !== 'undefined' && window.ethereum) {
+                      try {
+                        await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        console.log('✅ Manual MetaMask connection successful');
+                      } catch (error) {
+                        console.error('❌ Manual MetaMask connection failed:', error);
+                      }
+                    } else {
+                      console.log('❌ MetaMask not found');
+                    }
+                  }}
+                  variant="outline"
+                  className="min-h-[48px] sm:min-h-auto text-base sm:text-sm"
+                >
+                  Connect MetaMask
+                </Button>
+              </div>
             ) : (
               <Button disabled className="min-h-[48px] sm:min-h-auto text-base sm:text-sm">
                 MetaMask not detected - Please install MetaMask

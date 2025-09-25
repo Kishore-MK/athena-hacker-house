@@ -238,7 +238,28 @@ if (fromToken === 'MON') {
     connectors,
     isConnecting,
     balances,
-    connect,
+    connect: (connector: any) => {
+      console.log('🚀 Attempting to connect with:', {
+        connectorName: connector?.name,
+        connectorId: connector?.id,
+        ethereum: typeof window !== 'undefined' && !!window.ethereum,
+        metamask: typeof window !== 'undefined' && !!window.ethereum?.isMetaMask
+      });
+      
+      try {
+        const result = connect({ connector });
+        console.log('✅ Connect initiated:', result);
+        return result;
+      } catch (error) {
+        console.error('❌ Connect failed:', error);
+        toast({
+          title: 'Connection Failed',
+          description: error instanceof Error ? error.message : 'Failed to connect to MetaMask',
+          variant: 'destructive'
+        });
+        throw error;
+      }
+    },
     disconnect,
     handleSwap,
     refetchAllBalances,

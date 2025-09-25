@@ -81,27 +81,7 @@ export function BalancePanel({
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {(() => {
-              const metamaskConnectors = connectors.filter((connector) => 
-                connector.name.toLowerCase().includes('metamask')
-              );
-              const connector = metamaskConnectors[0];
-              
-              return connector ? (
-                <Button 
-                  key={connector.uid} 
-                  onClick={() => onConnect(connector)} 
-                  disabled={isConnecting} 
-                  className="min-h-[48px] sm:min-h-auto text-base sm:text-sm"
-                >
-                  {isConnecting ? 'Connecting...' : 'Connect MetaMask'}
-                </Button>
-              ) : (
-                <Button disabled className="min-h-[48px] sm:min-h-auto text-base sm:text-sm">
-                  MetaMask not detected
-                </Button>
-              );
-            })()}
+           
           </div>
         )}
       </div>

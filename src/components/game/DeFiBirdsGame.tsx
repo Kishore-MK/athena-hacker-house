@@ -31,6 +31,7 @@ export function DeFiBirdsGame() {
     balances: wallet.balances,
     isConnected: wallet.isConnected,
     handleSwap: wallet.handleSwap,
+    refetchBalances: wallet.refetchAllBalances,
   });
   
   const controls = useGameControls({
@@ -49,9 +50,22 @@ export function DeFiBirdsGame() {
 
   // Auto-select a bird with balance if current bird has no balance
   useEffect(() => {
+    console.log('🔄 Checking bird auto-selection:', { 
+      selectedBird, 
+      currentBalance: wallet.balances[selectedBird],
+      allBalances: wallet.balances,
+      isConnected: wallet.isConnected 
+    });
+
     if (wallet.isConnected && wallet.balances[selectedBird] <= 0) {
       const birdWithBalance = (Object.keys(wallet.balances) as Token[]).find(token => wallet.balances[token] > 0);
+      console.log('🐦 Looking for bird with balance:', { 
+        found: birdWithBalance, 
+        wouldChange: birdWithBalance && birdWithBalance !== selectedBird 
+      });
+      
       if (birdWithBalance && birdWithBalance !== selectedBird) {
+        console.log('🔄 Auto-selecting bird:', birdWithBalance);
         setSelectedBird(birdWithBalance);
       }
     }
@@ -88,6 +102,7 @@ export function DeFiBirdsGame() {
         selectedBird={selectedBird}
         onBirdSelect={setSelectedBird}
         balances={wallet.balances}
+        onRefreshBalances={wallet.refetchAllBalances}
       />
 
       {/* Game Status UI */}

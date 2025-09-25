@@ -35,6 +35,12 @@ export function useGameControls({
   const { toast } = useToast();
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // Don't interfere with button clicks or UI elements
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'BUTTON' || target.closest('button') || target.closest('.bird-selection-ui')) {
+      return;
+    }
+    
     if (gameState !== 'ready' || !isConnected) return;
     
     // Check if the selected bird has balance before allowing gameplay
@@ -65,7 +71,13 @@ export function useGameControls({
   }, [gameState, isConnected, balances, selectedBird, toast, setGameState, setIsDragging, setDragStart, setDragEnd]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault(); // Prevent scrolling
+    // Don't interfere with button clicks or UI elements
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'BUTTON' || target.closest('button') || target.closest('.bird-selection-ui')) {
+      return;
+    }
+    
+    // Removed e.preventDefault() to avoid passive event listener error
     if (gameState !== 'ready' || !isConnected) return;
     
     // Check if the selected bird has balance before allowing gameplay
@@ -114,7 +126,7 @@ export function useGameControls({
   }, [isDragging, setDragEnd]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault(); // Prevent scrolling
+    // Removed e.preventDefault() to avoid passive event listener error
     if (!isDragging) return;
     const touch = e.touches[0];
     const rect = e.currentTarget.getBoundingClientRect();
@@ -133,6 +145,7 @@ export function useGameControls({
   }, [isDragging, setDragEnd]);
 
   const handleMouseUp = useCallback(() => {
+    
     if (!isDragging) return;
     setIsDragging(false);
     

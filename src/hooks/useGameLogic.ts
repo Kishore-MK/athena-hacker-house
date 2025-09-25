@@ -62,9 +62,10 @@ interface UseGameLogicProps {
   balances: Record<Token, number>;
   isConnected: boolean;
   handleSwap: (fromToken: Token, toToken: Token) => Promise<void>;
+  refetchBalances?: () => Promise<void>;
 }
 
-export function useGameLogic({ selectedBird, balances, isConnected, handleSwap }: UseGameLogicProps) {
+export function useGameLogic({ selectedBird, balances, isConnected, handleSwap, refetchBalances }: UseGameLogicProps) {
   const [gameState, setGameState] = useState<GameState>('ready');
   const [chances, setChances] = useState(3);
   const [towers, setTowers] = useState<TowerStructure[]>([]);
@@ -230,8 +231,9 @@ export function useGameLogic({ selectedBird, balances, isConnected, handleSwap }
       chances,
       timestamp: new Date().toISOString()
     });
+console.log('Current Towers State:', hitTower,gameState);
 
-    if (gameState === 'hit' && hitTower) {
+    if ( hitTower) {
       console.log('🔄 INITIATING SWAP SEQUENCE', {
         from: selectedBird,
         to: hitTower,
@@ -239,7 +241,11 @@ export function useGameLogic({ selectedBird, balances, isConnected, handleSwap }
         gameStateWillChangeTo: 'swapping'
       });
       setGameState('swapping');
-      handleSwap(selectedBird, hitTower).then(() => {
+      handleSwap(selectedBird, hitTower).then(async () => {
+        console.log('✅ Swap completed, refreshing balances...');
+        if (refetchBalances) {
+          await refetchBalances();
+        }
         setTimeout(() => {
           handleNewTurn();
         }, 1000);
@@ -261,7 +267,7 @@ export function useGameLogic({ selectedBird, balances, isConnected, handleSwap }
             setGameState('gameover');
         }
     }
-  }, [gameState, hitTower, selectedBird, chances, handleSwap, handleNewTurn, resetBird]);
+  }, [gameState, hitTower, selectedBird, chances, handleSwap, handleNewTurn, resetBird, refetchBalances]);
 
   return {
     gameState,
